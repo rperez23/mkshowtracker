@@ -15,10 +15,11 @@ def getXLF():
     while True:
         xlf = input("  Give me your progress report (.xlsx extension): ")
 
-        m = re.search("\.xlsx$",xlf)
+        m = re.search("^(.+)\.xlsx$",xlf)
         if m and os.path.exists(xlf):
+            prefix = m.group(1)
             break
-    return xlf
+    return xlf,prefix
 
 def selectWS(wb,xlf):
 
@@ -36,7 +37,8 @@ def selectWS(wb,xlf):
     return sheet
 
 ####Main Program####
-xlf = getXLF()
+xlf,prefix = getXLF()
+
 
 try:
     wb = openpyxl.load_workbook(filename=xlf, read_only=True)
@@ -57,7 +59,7 @@ nonecount = 0
 showdict  = {}
 
 #Get the data
-print("Analyzing",end="")
+print("Analyzing",end="",flush=True)
 while True:
     show = str(ws.cell(row=r,column=showcol).value)
     snum = str(ws.cell(row=r,column=epcol).value)
@@ -76,11 +78,19 @@ while True:
             if show != 'Show Title':
                 showdict[season] = 1
     r += 1
-    print(".",end="")
+    print(".",end="",flush=True)
+
+outfname = prefix + ".csv"
+outf = open(outfname,"w")
 
 print("")
+outf.write("Show,Season,# Episodes,Notes,Merge Captions / MXF,Jarvis,Upload XL -> S3,Caption -> S3,Caption -> Box Archive,Cleared V1 In Veritone,Status\n")
 for s in sorted(showdict.keys()):
     if s != "Show Title::Season Number:":
-        print(s)
+        numeps = showdict[s]
+        showParts = s.split(':')
+        season = showParts[0] + "," + showParts[1] + "," + str(numeps) + "\n"
+        outf.write(season)
 
+outf.close()
 wb.close()
