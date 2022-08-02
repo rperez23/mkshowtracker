@@ -47,9 +47,39 @@ except:
 sheet = selectWS(wb,xlf)
 ws = wb[sheet]
 
+MAX_NONE = 50   #maximum number of None (assumes we get to the end)
+RECORD   = False
+
+r         = 1
+showcol   = 1
+epcol     = 2
+nonecount = 0
+showdict  = {}
+
 #Get the data
-While True:
-    txt = str(ws.cell(row=r,column=1).value)
-    print(txt)
+print("Analyzing",end="")
+while True:
+    show = str(ws.cell(row=r,column=showcol).value)
+    snum = str(ws.cell(row=r,column=epcol).value)
+
+    if show == 'None':
+        nonecount += 1
+        if nonecount == MAX_NONE:
+            break
+    else:
+        season = show + ':' + snum.zfill(2)
+        if season in showdict:
+            n = showdict[season]
+            n += 1
+            showdict[season] = n
+        else:
+            if show != 'Show Title':
+                showdict[season] = 1
+    r += 1
+    print(".",end="")
+
+print("")
+for s in sorted(showdict.keys()):
+    print(s)
 
 wb.close()
