@@ -84,12 +84,13 @@ outfname = prefix + ".csv"
 outf = open(outfname,"w")
 
 print("")
-outf.write("Show,Season,# Episodes,Notes,Merge Captions / MXF,Jarvis,Upload XL -> S3,Caption -> S3,Caption -> Box Archive,Cleared V1 In Veritone,Status\n")
+#outf.write("Show:Season,# Episodes,Notes,Merge Captions / MXF,Jarvis,Upload XL -> S3,Caption -> S3,Caption -> Box Archive,Cleared V1 In Veritone,Status\n")
+outf.write("Show:Season:# Episodes:Notes:Merge Captions / MXF:Jarvis:Upload XL -> S3:Caption -> S3:Caption -> Box Archive:Cleared V1 In Veritone:Status\n")
 for s in sorted(showdict.keys()):
     if s != "Show Title::Season Number:":
         numeps = showdict[s]
         showParts = s.split(':')
-        season = showParts[0] + "," + showParts[1] + "," + str(numeps) + "\n"
+        season = showParts[0] + ":" + showParts[1] + ":" + str(numeps) + "\n"
         outf.write(season)
 
 outf.close()
