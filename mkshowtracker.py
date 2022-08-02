@@ -80,6 +80,7 @@ while True:
 
 print("")
 for s in sorted(showdict.keys()):
-    print(s)
+    if s != "Show Title::Season Number:":
+        print(s)
 
 wb.close()
