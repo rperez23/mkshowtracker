@@ -6,9 +6,26 @@
 import os
 import re
 import sys
+import airtable
 import openpyxl
 
+apikey    = "keynFUEFq7QZPS34A"
+baseid    = "appJAa0wWijCR3dpm"
+headers   = {"Authorization" : "Bearer " + apikey, "Content-Type" : "application/json"}
+
+atrecords = { "records": [] }
+
+
+
+
+
 channeldict = {}
+
+#get the AirTable Base
+def getAtTableName():
+
+    tablename = input("  Give me your Air Table Tracker Name: ")
+    return tablename
 
 #get the name of the xlf (Progress Report)
 def getXLF():
@@ -82,15 +99,25 @@ sheet = selectWS(wb,xlf)
 ws = wb[sheet]
 
 channeldict = readXLF(ws)
+wb.close()
+
+tablename = getAtTableName()
+aturl = "https://api.airtable.com/v0/" + baseid + "/" + tablename
+#print(aturl)
 
 print("")
-print("Show:Season:# Episodes:Notes:Merge Captions / MXF:Jarvis:Upload XL -> S3:Caption -> S3:Caption -> Box Archive:Cleared V1 In Veritone:Status")
+#print("Show:Season:# Episodes:Notes:Merge Captions / MXF:Jarvis:Upload XL -> S3:Caption -> S3:Caption -> Box Archive:Cleared V1 In Veritone:Status")
 for s in sorted(channeldict.keys()):
     if s != "Show Title::Season Number:":
         numeps = channeldict[s]
         showParts = s.split(':')
         #season = showParts[0] + ":" + showParts[1] + ":" + str(numeps) + "\n"
         season = showParts[0] + ":" + showParts[1] + ":" + str(numeps)
-        print(season)
+        #print(season)
 
-wb.close()
+        rec = { 'fields': {'Show' : showParts[0], 'Season' : showParts[1], '# Episodes' : str(numeps) } }
+        atrecords["records"].append(rec)
+
+print(atrecords)
+
+#print(type(atrecords["records"]))
