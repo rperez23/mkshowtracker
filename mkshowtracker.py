@@ -6,7 +6,9 @@
 import os
 import re
 import sys
+import json
 import airtable
+import requests
 import openpyxl
 
 apikey    = "keynFUEFq7QZPS34A"
@@ -14,11 +16,6 @@ baseid    = "appJAa0wWijCR3dpm"
 headers   = {"Authorization" : "Bearer " + apikey, "Content-Type" : "application/json"}
 
 atrecords = { "records": [] }
-
-
-
-
-
 channeldict = {}
 
 #get the AirTable Base
@@ -85,6 +82,15 @@ def readXLF(ws):
 
     return showdict
 
+#def postData(atrecords, aturl):
+#
+#    for i in range(0, len(atrecords["records"]) ):
+#        if (i + 1) % 10 == 0:
+
+
+
+
+
 ####Main Program####
 xlf,prefix = getXLF()
 
@@ -105,6 +111,8 @@ tablename = getAtTableName()
 aturl = "https://api.airtable.com/v0/" + baseid + "/" + tablename
 #print(aturl)
 
+i    = 1
+oldi = i
 print("")
 #print("Show:Season:# Episodes:Notes:Merge Captions / MXF:Jarvis:Upload XL -> S3:Caption -> S3:Caption -> Box Archive:Cleared V1 In Veritone:Status")
 for s in sorted(channeldict.keys()):
@@ -118,6 +126,31 @@ for s in sorted(channeldict.keys()):
         rec = { 'fields': {'Show' : showParts[0], 'Season' : showParts[1], '# Episodes' : str(numeps) } }
         atrecords["records"].append(rec)
 
-print(atrecords)
+        if i % 10 == 0:
+            print("  Pushing Records",oldi,"->",i,"to Airtable",end=" ",flush=True)
+            response = requests.request("POST", aturl, headers=headers, data=json.dumps(atrecords))
+            if not response:
+                print(": ERROR")
+            else:
+                print("\n")
+            atrecords = { "records": [] }
+            oldi = i + 1
+        i += 1
 
-#print(type(atrecords["records"]))
+if atrecords != { "records": [] }:
+    print("  Pushing Records",oldi,"->",i,"to Airtable",end=" ",flush=True)
+    response = requests.request("POST", aturl, headers=headers, data=json.dumps(atrecords))
+    if not response:
+        print(": ERROR")
+    else:
+        print("\n")
+
+
+"""
+#print(atrecords)
+print("atrcords               :",type(atrecords))
+print("=======")
+print("atrecords[\"records\"]   :",type(atrecords["records"]))
+print("=======")
+print("fields                 :",type(rec))
+"""
